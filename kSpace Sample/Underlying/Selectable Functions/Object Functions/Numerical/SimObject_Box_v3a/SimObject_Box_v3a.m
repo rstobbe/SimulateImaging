@@ -68,7 +68,9 @@ function err = BuildSimObject(SIMOB,SIMMETH,STCH)
     %---------------------------------------------
     SIMOB.ObMatSz = M;
     SIMOB.name = ['Box','X',num2str(SIMOB.XDim0),'Y',num2str(SIMOB.YDim0),'Z',num2str(SIMOB.ZDim0)];
-
+    ind = strfind(SIMOB.name,'.');
+    SIMOB.name(ind) = 'p';
+    
     %---------------------------------------------
     % Panel Output
     %--------------------------------------------- 

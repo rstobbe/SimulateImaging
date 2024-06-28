@@ -91,9 +91,9 @@ function [SampDat,err] = kSpaceSample(KSMP,AcqInfo)
     end
     
     KernHolder = NufftKernelHolder();
-%     if ReconObj.LowGpuRamCase
-%         KernHolder.SetReducedSubSamp();           % probably not a big savings...
-%     end
+    if KSMP.BaseMatrix > 600
+        KernHolder.SetReducedSubSamp();           % for big zero-fill
+    end
     KernHolder.SetBaseMatrix(KSMP.BaseMatrix);
     KernHolder.Initialize(AcqInfo,KSMP.RxChannels);    
     
