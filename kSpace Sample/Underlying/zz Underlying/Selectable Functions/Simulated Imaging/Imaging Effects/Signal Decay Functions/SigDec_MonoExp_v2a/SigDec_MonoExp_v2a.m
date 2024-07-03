@@ -36,10 +36,12 @@ function [SampDat,err] = AddPostEffect(SIGDEC,SIMMETH,STCH,SampDat0)
     err.flag = 0;
     T2decay = exp(-STCH.SamplingTimeOnTrajectory/SIGDEC.T2);
 
-    if strcmp(SIGDEC.NormToOne,'Yes')
-        T2decay = T2decay / T2decay(STCH.SamplingPtAtCentre);
+    if ~isempty(STCH.SamplingPtAtCentre)
+        if strcmp(SIGDEC.NormToOne,'Yes')
+            T2decay = T2decay / T2decay(STCH.SamplingPtAtCentre);
+        end
     end
-    T2decaymat = repmat(T2decay.',[1 STCH.NumTraj]);
+    T2decaymat = repmat(T2decay,[STCH.NumTraj 1]);
     SampDat = T2decaymat .* SampDat0;       
     
     %---------------------------------------------
