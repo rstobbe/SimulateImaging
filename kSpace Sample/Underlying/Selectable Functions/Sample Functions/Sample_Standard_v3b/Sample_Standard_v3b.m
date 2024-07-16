@@ -10,6 +10,7 @@ properties (SetAccess = private)
     BaseMatrix
     GridMatrix
     OffResMap
+    OffResTimeArr
     Sim
     OffResonance = 0
     RxChannels = 1
@@ -42,11 +43,17 @@ function SetBaseMatrix(KSMP,BaseMatrix)
 end
 
 %==================================================================
+% SetOffResSampling
+%================================================================== 
+function SetOffResSampling(KSMP)
+    KSMP.OffResonance = 1;
+end
+
+%==================================================================
 % SetOffResMap
 %================================================================== 
 function SetOffResMap(KSMP,OffResMap)
-    KSMP.OffResMap = OffResMap;
-    KSMP.OffResonance = 1;
+    KSMP.Sim.LoadOffResonance(single(OffResMap),KSMP.OffResTimeArr);
 end
 
 %==================================================================
@@ -94,13 +101,12 @@ function kSpaceSampleInitialize(KSMP,AcqInfo)
     KernHolder.Initialize(AcqInfo,KSMP.RxChannels);    
     if KSMP.OffResonance
         KSMP.Sim = SampleOffResImage(); 
-        KSMP.Sim.SetBaseMatrix(KSMP.BaseMatrix);
-        KSMP.Sim.Initialize(AcqInfo,KSMP.RxChannels);  
+        KSMP.OffResTimeArr = AcqInfo.OffResTimeArr + KSMP.Delay + AcqInfo.SampStartTime/1000;
     else
         KSMP.Sim = SampleOnResImage();
-        KSMP.Sim.Initialize(KernHolder,AcqInfo);
-        KSMP.Sim.LoadRxProfs(KSMP.RxProfs);
     end
+    KSMP.Sim.Initialize(KernHolder,AcqInfo);
+    KSMP.Sim.LoadRxProfs(KSMP.RxProfs);
     KSMP.GridMatrix = KernHolder.GridMatrix;
 end
 
@@ -108,12 +114,7 @@ end
 % kSpaceSample
 %================================================================== 
 function SampDat = kSpaceSample(KSMP)  
-    if KSMP.OffResonance
-        OffResTimeArr = AcqInfo.OffResTimeArr + KSMP.Delay + AcqInfo.SampStartTime/1000;
-        SampDat = KSMP.Sim.Sample(KSMP.Image,KSMP.RxProfs,KSMP.OffResMap,OffResTimeArr);   
-    else
-        SampDat = KSMP.Sim.Sample(KSMP.Image);
-    end
+    SampDat = KSMP.Sim.Sample(KSMP.Image);   
     if sum(SampDat(:)) == 0
         error('Sampling Error');
     end
